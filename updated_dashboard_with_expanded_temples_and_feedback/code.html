@@ -9,6 +9,7 @@
 <!-- Material Symbols -->
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
 // Temple Detail Routing Logic
 function openTempleDetails(cardElement) {
@@ -188,46 +189,140 @@ function openTempleDetails(cardElement) {
 </header>
 
 <!-- ======= PROFILE / SIGN-IN MODAL ======= -->
-<div id="profile-modal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-black/50 backdrop-blur-sm p-4">
-  <div class="w-full max-w-lg bg-white rounded-2xl shadow-2xl overflow-hidden">
-    <div class="bg-gradient-to-r from-primary to-orange-400 p-5 text-white flex items-start justify-between">
-      <div>
-        <p class="text-[11px] font-black tracking-widest uppercase text-white/80">Account</p>
-        <h3 class="text-xl font-extrabold">User Profile</h3>
-        <p class="text-sm text-white/85 mt-1">Basic info used for bookings & confirmations</p>
-      </div>
-      <button type="button" onclick="closeProfileModal()" class="material-symbols-outlined bg-white/20 rounded-full p-1.5 hover:bg-white/35 transition-all">close</button>
+<div id="profile-modal" class="hidden fixed inset-0 z-[60] items-center justify-center bg-black/50 backdrop-blur-md p-4">
+    <div class="w-full max-w-2xl bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col md:flex-row h-[600px]">
+        <!-- Sidebar Tabs -->
+        <div class="w-full md:w-64 bg-slate-50 border-r border-slate-100 p-6 flex flex-col gap-2">
+            <div class="mb-6">
+                <div class="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-3">
+                    <span class="material-symbols-outlined text-primary text-3xl">account_circle</span>
+                </div>
+                <h3 id="dash-user-name" class="font-bold text-slate-800">Pilgrim Account</h3>
+                <p id="dash-user-email" class="text-xs text-slate-500 truncate">Not signed in</p>
+            </div>
+            
+            <button onclick="switchDashTab('personal')" id="tab-btn-personal" class="dash-tab-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all bg-primary text-white shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-[20px]">person</span> Personal Details
+            </button>
+            <button onclick="switchDashTab('history')" id="tab-btn-history" class="dash-tab-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-white hover:shadow-sm">
+                <span class="material-symbols-outlined text-[20px]">history</span> Booking History
+            </button>
+            <button onclick="switchDashTab('security')" id="tab-btn-security" class="dash-tab-btn flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold transition-all text-slate-600 hover:bg-white hover:shadow-sm">
+                <span class="material-symbols-outlined text-[20px]">security</span> Privacy & Security
+            </button>
+            
+            <div class="mt-auto pt-6 border-t border-slate-200">
+                <button onclick="signOutProfile()" class="flex items-center gap-3 w-full px-4 py-3 rounded-xl text-sm font-bold text-red-500 hover:bg-red-50 transition-all">
+                    <span class="material-symbols-outlined text-[20px]">logout</span> Sign Out
+                </button>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 flex flex-col bg-white overflow-hidden relative">
+            <!-- Header -->
+            <div class="p-6 border-b border-slate-50 flex justify-between items-center bg-white sticky top-0 z-10">
+                <h2 id="dash-tab-title" class="text-xl font-extrabold text-slate-800">Personal Details</h2>
+                <button type="button" onclick="closeProfileModal()" class="material-symbols-outlined bg-slate-100 rounded-full p-2 hover:bg-slate-200 transition-all text-slate-500">close</button>
+            </div>
+
+            <!-- Scrollable Sections -->
+            <div class="flex-1 overflow-y-auto p-8 no-scrollbar">
+                
+                <!-- Section 1: Personal Details -->
+                <div id="dash-section-personal" class="dash-section space-y-6">
+                    <div class="bg-amber-50 rounded-2xl p-5 border border-amber-100">
+                        <div class="flex items-start gap-4">
+                            <span class="material-symbols-outlined text-amber-600 bg-white p-2 rounded-xl shadow-sm">info</span>
+                            <div>
+                                <p class="text-xs font-black text-amber-800 uppercase tracking-widest">Profile Status</p>
+                                <p id="profile-status" class="mt-1 text-sm font-bold text-amber-900">Signed in via Supabase</p>
+                                <p id="profile-sub" class="mt-1 text-xs text-amber-700/80">Your identity is verified. Your details help us auto-fill bookings.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Full Name</label>
+                            <input id="profile-name" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all" placeholder="E.g. Ramesh Kumar" />
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Phone Number</label>
+                            <input id="profile-phone" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all" placeholder="+91 XXXXX XXXXX" />
+                        </div>
+                        <div class="space-y-1.5 md:col-span-2">
+                            <label class="text-[11px] font-black text-slate-400 uppercase tracking-widest ml-1">Home City</label>
+                            <input id="profile-city" type="text" class="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-semibold focus:ring-4 focus:ring-primary/10 focus:border-primary outline-none transition-all" placeholder="Bengaluru / Mangaluru / etc." />
+                        </div>
+                    </div>
+
+                    <div class="pt-4">
+                        <button onclick="saveProfile()" class="w-full bg-slate-900 text-white py-4 rounded-2xl font-bold shadow-xl shadow-slate-200 hover:bg-slate-800 transition-all flex justify-center items-center gap-2">
+                            Update Profile Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Section 2: History -->
+                <div id="dash-section-history" class="dash-section hidden space-y-4">
+                    <div id="history-loading" class="flex flex-col items-center justify-center py-20 text-slate-400 hidden">
+                        <span class="material-symbols-outlined animate-spin text-4xl mb-4">sync</span>
+                        <p class="font-bold">Fetching your records...</p>
+                    </div>
+                    
+                    <div id="history-empty" class="flex flex-col items-center justify-center py-20 text-slate-400">
+                        <div class="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mb-4">
+                            <span class="material-symbols-outlined text-4xl opacity-20">history_edu</span>
+                        </div>
+                        <p class="font-bold">No booking records found</p>
+                        <p class="text-xs text-center px-8 mt-2">Any tickets you book will appear here for quick access and downloads.</p>
+                        <button onclick="closeProfileModal(); showView('view-live-status');" class="mt-6 text-primary font-bold text-sm hover:underline">Start your first booking →</button>
+                    </div>
+
+                    <div id="history-list" class="space-y-3 hidden">
+                        <!-- Bookings will be injected here -->
+                    </div>
+                </div>
+
+                <!-- Section 3: Security -->
+                <div id="dash-section-security" class="dash-section hidden space-y-6">
+                    <div class="flex items-center gap-4 p-5 bg-blue-50 border border-blue-100 rounded-2xl">
+                        <span class="material-symbols-outlined text-blue-500">lock_open</span>
+                        <div>
+                            <p class="font-bold text-blue-900 text-sm">Two-Factor Auth</p>
+                            <p class="text-xs text-blue-700">Add an extra layer of security to your pilgrim account.</p>
+                        </div>
+                        <button class="ml-auto text-xs font-black text-blue-500 uppercase tracking-widest hover:underline">Enable</button>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">Email Notifications</p>
+                                <p class="text-xs text-slate-500">Receive tickets and receipts via email</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" checked class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                        <div class="flex items-center justify-between p-4 border-b border-slate-100">
+                            <div>
+                                <p class="text-sm font-bold text-slate-800">SMS Alerts</p>
+                                <p class="text-xs text-slate-500">Get live queue updates via SMS</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" class="sr-only peer">
+                                <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
     </div>
-
-    <div class="p-5 space-y-4">
-      <div class="rounded-xl border border-slate-100 bg-slate-50 p-4">
-        <p class="text-xs font-black text-slate-500 uppercase tracking-widest">Status</p>
-        <p id="profile-status" class="mt-1 text-sm font-extrabold text-slate-800">Signed out</p>
-        <p id="profile-sub" class="mt-1 text-xs text-slate-500">Sign in to save your details for faster ticket booking.</p>
-      </div>
-
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <label class="text-sm font-bold text-slate-700">Full name
-          <input id="profile-name" class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 focus:ring-2 focus:ring-primary" placeholder="Your name" />
-        </label>
-        <label class="text-sm font-bold text-slate-700">Phone number
-          <input id="profile-phone" class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 focus:ring-2 focus:ring-primary" placeholder="+91XXXXXXXXXX" />
-        </label>
-        <label class="text-sm font-bold text-slate-700 md:col-span-2">Home city (optional)
-          <input id="profile-city" class="mt-1 w-full rounded-xl border border-slate-200 bg-white px-3 py-2 focus:ring-2 focus:ring-primary" placeholder="Mangalore / Bengaluru / etc" />
-        </label>
-      </div>
-
-      <div class="flex flex-col md:flex-row gap-2 pt-1">
-        <button type="button" onclick="saveProfile()" class="flex-1 bg-primary text-white py-3 rounded-xl font-extrabold hover:bg-primary-dim transition">Save & Sign in</button>
-        <button type="button" onclick="signOutProfile()" class="flex-1 bg-white border border-slate-200 text-slate-700 py-3 rounded-xl font-extrabold hover:bg-slate-50 transition">Sign out</button>
-      </div>
-
-      <p class="text-[11px] text-slate-400 leading-relaxed">
-        Note: This is a simple local sign-in for now (stored in your browser). We can upgrade to OTP/Supabase Auth later.
-      </p>
-    </div>
-  </div>
 </div>
 <!-- SideNavBar -->
 <aside class="hidden lg:flex flex-col h-screen w-64 fixed left-0 top-0 z-40 bg-white border-r border-transparent shadow-xl pt-24 px-4">
@@ -3800,6 +3895,13 @@ function endSosPress() {
     }
 }
 
+// Supabase Configuration
+const SUPABASE_URL = 'https://bmcnrgywmanhyscdpvrq.supabase.co'; 
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJtY25yZ3l3bWFuaHlzY2RwdnJxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzgxMzUwNzEsImV4cCI6MjA5MzcxMTA3MX0.WQQ4tjwGJD5tEhteLlUA38XXpZ9rO7w-x7ERdbNNxEY'; 
+
+// Initialize Supabase Client
+const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
 // Add event listeners once DOM is ready
 document.addEventListener("DOMContentLoaded", async () => {
     const btn = document.getElementById('sos-btn');
@@ -3811,6 +3913,35 @@ document.addEventListener("DOMContentLoaded", async () => {
         btn.addEventListener('mouseleave', endSosPress);
         btn.addEventListener('touchend', endSosPress);
     }
+    
+    // Sync with Supabase session
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session && session.user) {
+        const profile = {
+            name: session.user.email.split('@')[0],
+            email: session.user.email,
+            phone: session.user.phone || '',
+            id: session.user.id,
+            updatedAt: new Date().toISOString()
+        };
+        localStorage.setItem('dd_profile', JSON.stringify(profile));
+    } else {
+        // No Supabase session — check for a guest session stored under "user" key
+        const storedUser = JSON.parse(localStorage.getItem('user') || 'null');
+        if (storedUser && storedUser.role === 'guest') {
+            // Ensure dd_profile reflects the guest user
+            const existing = JSON.parse(localStorage.getItem('dd_profile') || 'null');
+            if (!existing || existing.role !== 'guest') {
+                localStorage.setItem('dd_profile', JSON.stringify({
+                    name: storedUser.name || 'Guest Devotee',
+                    email: storedUser.email || 'guest@divyadarshan.app',
+                    role: 'guest',
+                    updatedAt: new Date().toISOString()
+                }));
+            }
+        }
+    }
+
     await ddBootstrap();
     updateBookingView();
     updateParkingView();
@@ -3836,13 +3967,134 @@ function setProfile(p) {
 
 function isSignedIn() {
     const p = getProfile();
-    return !!(p && p.phone);
+    return !!(p && (p.phone || p.email));
 }
 
 function loadProfileFromStorage() {
     const p = getProfile();
     const topBtn = document.getElementById('topbar-auth-btn');
-    if (topBtn) topBtn.innerText = isSignedIn() ? 'Sign out' : 'Sign in';
+    if (topBtn) {
+        if (p && p.role === 'guest') {
+            topBtn.innerText = '\uD83D\uDC64 Guest';
+        } else {
+            topBtn.innerText = isSignedIn() ? 'Sign out' : 'Sign in';
+        }
+    }
+    
+    // Update dashboard header
+    const dashName = document.getElementById('dash-user-name');
+    const dashEmail = document.getElementById('dash-user-email');
+    if (dashName && p) dashName.innerText = p.name || 'Pilgrim';
+    if (dashEmail && p) dashEmail.innerText = p.email || p.phone || 'Verified User';
+}
+
+function switchDashTab(tabId) {
+    // Buttons
+    document.querySelectorAll('.dash-tab-btn').forEach(b => {
+        b.classList.remove('bg-primary', 'text-white', 'shadow-lg', 'shadow-primary/20');
+        b.classList.add('text-slate-600', 'hover:bg-white', 'hover:shadow-sm');
+    });
+    const activeBtn = document.getElementById('tab-btn-' + tabId);
+    if (activeBtn) {
+        activeBtn.classList.add('bg-primary', 'text-white', 'shadow-lg', 'shadow-primary/20');
+        activeBtn.classList.remove('text-slate-600', 'hover:bg-white', 'hover:shadow-sm');
+    }
+
+    // Sections
+    document.querySelectorAll('.dash-section').forEach(s => s.classList.add('hidden'));
+    const activeSection = document.getElementById('dash-section-' + tabId);
+    if (activeSection) activeSection.classList.remove('hidden');
+
+    // Title
+    const titleEl = document.getElementById('dash-tab-title');
+    if (titleEl) {
+        const titles = { personal: 'Personal Details', history: 'Booking History', security: 'Privacy & Security' };
+        titleEl.innerText = titles[tabId] || 'Details';
+    }
+
+    if (tabId === 'history') fetchUserHistory();
+}
+
+async function fetchUserHistory() {
+    const p = getProfile();
+    const list = document.getElementById('history-list');
+    const empty = document.getElementById('history-empty');
+    const loading = document.getElementById('history-loading');
+
+    if (!p || (!p.phone && !p.email)) {
+        list.classList.add('hidden');
+        empty.classList.remove('hidden');
+        return;
+    }
+
+    loading.classList.remove('hidden');
+    list.classList.add('hidden');
+    empty.classList.add('hidden');
+
+    try {
+        // Fetch from Supabase bookings table
+        let query = supabase.from('bookings').select('*');
+        if (p.phone) {
+            query = query.eq('phone', p.phone);
+        } else if (p.email) {
+            // Note: In a real app, bookings should ideally be linked by user_id
+            query = query.eq('email', p.email); 
+        }
+        
+        const { data, error } = await query.order('visit_date', { ascending: false });
+
+        loading.classList.add('hidden');
+        if (error) throw error;
+
+        if (!data || data.length === 0) {
+            empty.classList.remove('hidden');
+        } else {
+            list.classList.remove('hidden');
+            renderHistoryList(data);
+        }
+    } catch (err) {
+        console.error('History fetch failed', err);
+        loading.classList.add('hidden');
+        empty.classList.remove('hidden');
+    }
+}
+
+function renderHistoryList(bookings) {
+    const list = document.getElementById('history-list');
+    list.innerHTML = '';
+
+    bookings.forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'p-4 rounded-2xl border border-slate-100 hover:border-primary/20 hover:bg-slate-50/50 transition-all group';
+        
+        const visitDate = b.visit_date || b.date;
+        const isUpcoming = visitDate ? new Date(visitDate) >= new Date().setHours(0,0,0,0) : true;
+        const statusColor = isUpcoming ? 'text-emerald-600 bg-emerald-50' : 'text-slate-400 bg-slate-50';
+        
+        item.innerHTML = `
+            <div class="flex justify-between items-start mb-2">
+                <div>
+                    <p class="font-black text-slate-800 text-sm">${b.temple_name || b.templeName || 'Temple Visit'}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">ID: ${b.id || b.ticketId}</p>
+                </div>
+                <span class="px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-wider ${statusColor}">
+                    ${isUpcoming ? 'Upcoming' : 'Past'}
+                </span>
+            </div>
+            <div class="flex items-center gap-4 text-[11px] text-slate-500">
+                <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">calendar_month</span>
+                    ${visitDate || 'N/A'}
+                </div>
+                <div class="flex items-center gap-1">
+                    <span class="material-symbols-outlined text-[14px]">group</span>
+                    ${b.qty || b.pilgrims || 1} Pilgrims
+                </div>
+                <button class="ml-auto text-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity">Details</button>
+            </div>
+        `;
+        list.appendChild(item);
+    });
 }
 
 function openProfileModal() {
@@ -3857,13 +4109,16 @@ function openProfileModal() {
     const statusEl = document.getElementById('profile-status');
     const subEl = document.getElementById('profile-sub');
     if (isSignedIn()) {
-        statusEl.innerText = `Signed in as ${p.name ? p.name : 'User'} (${p.phone})`;
-        subEl.innerText = 'Your details will be used to auto-fill ticket booking.';
+        statusEl.innerText = `Verified Profile: ${p.name ? p.name : (p.email || 'Pilgrim')}`;
+        subEl.innerText = 'Your pilgrimage account is active and synced.';
     } else {
-        statusEl.innerText = 'Signed out';
-        subEl.innerText = 'Sign in to save your details for faster ticket booking.';
+        statusEl.innerText = 'Guest Mode';
+        subEl.innerText = 'Sign in to access your full booking history.';
     }
 
+    loadProfileFromStorage();
+    switchDashTab('personal'); // Default to personal tab
+    
     modal.classList.remove('hidden');
     modal.classList.add('flex');
 }
@@ -3887,18 +4142,21 @@ function saveProfile() {
     }
 
     const phone = phoneRaw.startsWith('+') ? phoneRaw : ('+91 ' + digits.slice(-10));
-    setProfile({ name, phone, city, updatedAt: new Date().toISOString() });
+    const oldP = getProfile() || {};
+    setProfile({ ...oldP, name, phone, city, updatedAt: new Date().toISOString() });
     loadProfileFromStorage();
 
     // Auto-fill ticket form phone if present
     const phoneInput = document.getElementById('ticket-phone');
     if (phoneInput && !String(phoneInput.value || '').trim()) phoneInput.value = phone;
 
-    closeProfileModal();
+    alert('✅ Profile updated successfully!');
 }
 
-function signOutProfile() {
+async function signOutProfile() {
     setProfile(null);
+    // Also clear the guest "user" session key if it exists
+    localStorage.removeItem('user');
     loadProfileFromStorage();
     closeProfileModal();
 }
