@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Spot Finder | Divya Darshan</title>
+<meta name="description" content="Discover nearby temples and facilities with Divya Darshan Spot Finder"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script>
+tailwind.config={darkMode:'class',theme:{extend:{colors:{
+'dd-bg':'#0f0d13','dd-card':'#1a1721','dd-card-hover':'#231f2e',
+'dd-border':'#2a2535','dd-orange':'#E65100','dd-amber':'#FF8F00',
+'dd-glow':'rgba(230,81,0,0.15)','dd-text':'#e8e4ef','dd-muted':'#8a8494'
+},fontFamily:{headline:['Manrope'],body:['Inter']}}}}
+</script>
+<style>
+body{font-family:'Inter',sans-serif;background:#0f0d13;color:#e8e4ef}
+h1,h2,h3,.brand{font-family:'Manrope',sans-serif}
+.material-symbols-outlined{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24}
+.filled{font-variation-settings:'FILL' 1,'wght' 400,'GRAD' 0,'opsz' 24}
+.glass{background:rgba(26,23,33,0.8);backdrop-filter:blur(20px);border:1px solid #2a2535}
+.glow-border{box-shadow:0 0 0 1px rgba(230,81,0,0.3),0 0 20px rgba(230,81,0,0.08)}
+.card-hover{transition:all .3s ease}
+.card-hover:hover{transform:translateY(-4px);box-shadow:0 12px 40px rgba(230,81,0,0.12)}
+.filter-pill{transition:all .2s ease}
+.filter-pill:hover,.filter-pill.active{background:#E65100;color:#fff;border-color:#E65100}
+.search-glow:focus{box-shadow:0 0 0 3px rgba(230,81,0,0.2)}
+.fade-in{animation:fadeIn .5s ease forwards;opacity:0}
+@keyframes fadeIn{to{opacity:1}}
+@keyframes pulse-dot{0%,100%{opacity:1}50%{opacity:.4}}
+.pulse-dot{animation:pulse-dot 2s infinite}
+.facility-chip{transition:all .2s}
+.facility-chip:hover{background:rgba(230,81,0,0.15);border-color:#E65100}
+::-webkit-scrollbar{width:6px}
+::-webkit-scrollbar-track{background:#0f0d13}
+::-webkit-scrollbar-thumb{background:#2a2535;border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:#3a3545}
+</style>
+</head>
+<body class="min-h-screen">
+
+<!-- TOP NAV -->
+<header class="glass sticky top-0 z-50 border-b border-dd-border">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+  <a href="../updated_dashboard_with_expanded_temples_and_feedback/code.html" class="flex items-center gap-2 group">
+    <span class="material-symbols-outlined text-dd-orange text-2xl group-hover:scale-110 transition-transform">arrow_back</span>
+    <span class="text-sm font-bold text-dd-muted group-hover:text-dd-text transition-colors">Dashboard</span>
+  </a>
+  <div class="flex items-center gap-2">
+    <span class="material-symbols-outlined text-dd-orange filled">explore</span>
+    <h1 class="text-lg font-extrabold tracking-tight">Spot Finder</h1>
+  </div>
+  <div class="w-20"></div>
+</div>
+</header>
+
+<!-- HERO SEARCH -->
+<section class="relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-b from-dd-orange/5 to-transparent pointer-events-none"></div>
+<div class="max-w-3xl mx-auto px-4 sm:px-6 pt-10 pb-6 relative z-10 text-center">
+  <p class="text-xs font-bold text-dd-orange uppercase tracking-[.2em] mb-2">Discover Sacred Places</p>
+  <h2 class="text-3xl sm:text-4xl font-extrabold tracking-tight mb-3">Find Temples Near You</h2>
+  <p class="text-dd-muted text-sm mb-8 max-w-md mx-auto">Search temples, check crowd levels, and explore nearby facilities — all in one place.</p>
+  <div class="relative max-w-xl mx-auto">
+    <span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-dd-muted">search</span>
+    <input id="searchInput" type="text" placeholder="Search by temple name or city..."
+      class="w-full bg-dd-card border border-dd-border rounded-2xl py-4 pl-12 pr-4 text-sm text-dd-text placeholder:text-dd-muted/60 focus:outline-none search-glow transition-all"
+      oninput="filterTemples()"/>
+  </div>
+</div>
+</section>
+
+<!-- FILTERS -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 pb-4">
+<div class="flex flex-wrap gap-2 justify-center" id="filterBar">
+  <button class="filter-pill active px-4 py-2 rounded-full text-xs font-bold border border-dd-border bg-transparent text-dd-muted" data-filter="all" onclick="setFilter('all',this)">All Temples</button>
+  <button class="filter-pill px-4 py-2 rounded-full text-xs font-bold border border-dd-border bg-transparent text-dd-muted" data-filter="nearby" onclick="setFilter('nearby',this)">
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">near_me</span>Nearby</span></button>
+  <button class="filter-pill px-4 py-2 rounded-full text-xs font-bold border border-dd-border bg-transparent text-dd-muted" data-filter="low" onclick="setFilter('low',this)">
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">sentiment_satisfied</span>Less Crowded</span></button>
+  <button class="filter-pill px-4 py-2 rounded-full text-xs font-bold border border-dd-border bg-transparent text-dd-muted" data-filter="popular" onclick="setFilter('popular',this)">
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">star</span>Popular</span></button>
+  <button class="filter-pill px-4 py-2 rounded-full text-xs font-bold border border-dd-border bg-transparent text-dd-muted" data-filter="open" onclick="setFilter('open',this)">
+    <span class="inline-flex items-center gap-1"><span class="material-symbols-outlined text-[14px]">schedule</span>Open Now</span></button>
+</div>
+</section>
+
+<!-- RESULTS COUNT -->
+<div class="max-w-7xl mx-auto px-4 sm:px-6 mb-4 flex items-center justify-between">
+  <p class="text-xs font-bold text-dd-muted"><span id="resultCount">10</span> temples found</p>
+  <button onclick="scrollTo({top:0,behavior:'smooth'})" class="text-xs text-dd-orange font-bold hover:underline flex items-center gap-1">
+    <span class="material-symbols-outlined text-[14px]">arrow_upward</span>Top
+  </button>
+</div>
+
+<!-- TEMPLE GRID -->
+<main class="max-w-7xl mx-auto px-4 sm:px-6 pb-16">
+<div id="templeGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5"></div>
+<div id="noResults" class="hidden text-center py-20">
+  <span class="material-symbols-outlined text-6xl text-dd-muted/30 mb-4 block">search_off</span>
+  <p class="font-bold text-dd-muted">No temples match your search</p>
+  <p class="text-xs text-dd-muted/60 mt-1">Try different keywords or filters</p>
+</div>
+</main>
+
+<!-- TEMPLE DETAIL MODAL -->
+<div id="detailModal" class="fixed inset-0 z-[100] hidden">
+<div class="absolute inset-0 bg-black/70 backdrop-blur-sm" onclick="closeDetail()"></div>
+<div class="absolute inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 top-8 sm:top-12 sm:w-full sm:max-w-2xl bg-dd-card rounded-3xl border border-dd-border overflow-hidden max-h-[85vh] overflow-y-auto" id="detailContent">
+</div>
+</div>
+
+<!-- FOOTER -->
+<footer class="border-t border-dd-border py-8 mt-8">
+<div class="max-w-7xl mx-auto px-6 flex flex-col sm:flex-row justify-between items-center gap-4">
+  <p class="text-xs text-dd-muted">© 2024 Divya Darshan Sanctuary. All rights reserved.</p>
+  <a href="../updated_dashboard_with_expanded_temples_and_feedback/code.html" class="text-xs text-dd-orange font-bold hover:underline">← Back to Dashboard</a>
+</div>
+</footer>
+
+<script src="spot_finder.js"></script>
+</body>
+</html>
